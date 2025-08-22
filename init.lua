@@ -91,7 +91,7 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.o`
@@ -475,6 +475,7 @@ require('lazy').setup({
       },
     },
   },
+
   {
     -- Main LSP Configuration
     'neovim/nvim-lspconfig',
@@ -571,6 +572,9 @@ require('lazy').setup({
           --  Useful when you're not sure what type a variable is and you want to see
           --  the definition of its *type*, not where it was *defined*.
           map('grt', require('telescope.builtin').lsp_type_definitions, '[G]oto [T]ype Definition')
+
+          -- Open file explorer (netrw at the moment)
+          map('<leader>e', vim.cmd.Ex, 'Open File Explorer (netrw)')
 
           -- This function resolves a difference between neovim nightly (version 0.11) and stable (version 0.10)
           ---@param client vim.lsp.Client
@@ -671,6 +675,7 @@ require('lazy').setup({
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
+        glsl_analyzer = {},
         -- clangd = {},
         -- gopls = {},
         -- pyright = {},
@@ -732,6 +737,18 @@ require('lazy').setup({
             require('lspconfig')[server_name].setup(server)
           end,
         },
+      }
+
+      local util = require 'lspconfig.util'
+
+      require('lspconfig').ols.setup {
+        cmd = { 'C:/Users/shane/ols/ols.exe' },
+        filetypes = { 'odin' },
+        root_dir = util.root_pattern('ols.json', 'odinfmt.json', '.git'),
+        capabilities = capabilities,
+        on_attach = function(_, bufnr)
+          vim.diagnostic.enable(false, { bufnr = bufnr })
+        end,
       }
     end,
   },
@@ -919,6 +936,9 @@ require('lazy').setup({
       -- - sr)'  - [S]urround [R]eplace [)] [']
       require('mini.surround').setup()
 
+      -- Autopairs
+      require('mini.pairs').setup()
+
       -- Simple and easy statusline.
       --  You could remove this setup call if you don't like it,
       --  and try some other statusline plugin
@@ -1012,5 +1032,24 @@ require('lazy').setup({
   },
 })
 
+-- Add GLSL and HLSL filetypes for treesitter
+vim.filetype.add {
+  extension = {
+    glsl = 'glsl',
+    hlsl = 'hlsl',
+  },
+}
+
+-- set the GUI to use a nerd font, for Neovide
+vim.opt.guifont = { 'JetBrainsMono Nerd Font', ':h14' }
+-- copy/paste with OS keybinds in Neovide
+if vim.g.neovide then
+  vim.keymap.set('n', '<D-s>', ':w<CR>') -- Save
+  vim.keymap.set('v', '<D-c>', '"+y') -- Copy
+  vim.keymap.set('n', '<D-v>', '"+P') -- Paste normal mode
+  vim.keymap.set('v', '<D-v>', '"+P') -- Paste visual mode
+  vim.keymap.set('c', '<D-v>', '<C-R>+') -- Paste command mode
+  vim.keymap.set('i', '<D-v>', '<ESC>l"+Pli') -- Paste insert mode
+end
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
