@@ -128,6 +128,9 @@ vim.o.undofile = true
 vim.o.ignorecase = true
 vim.o.smartcase = true
 
+vim.opt.autoindent = true
+vim.opt.smartindent = true
+
 -- Keep signcolumn on by default
 vim.o.signcolumn = 'yes'
 
@@ -247,7 +250,12 @@ rtp:prepend(lazypath)
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
-  'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
+  {
+    -- Detect tabstop and shiftwidth automatically
+    'NMAC427/guess-indent.nvim',
+    event = 'BufReadPost', -- set the loading event to after the file has been read into a buffer
+    opts = {}, -- default config
+  },
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
@@ -790,6 +798,13 @@ require('lazy').setup({
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
+        javascript = { 'prettierd', 'prettier' },
+        javascriptreact = { 'prettierd', 'prettier' },
+        typescript = { 'prettierd', 'prettier' },
+        typescriptreact = { 'prettierd', 'prettier' },
+        json = { 'prettierd', 'prettier' },
+        html = { 'prettierd', 'prettier' },
+        css = { 'prettierd', 'prettier' },
       },
     },
   },
@@ -911,7 +926,7 @@ require('lazy').setup({
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+      -- vim.cmd.colorscheme 'tokyonight-night'
     end,
   },
 
@@ -939,6 +954,13 @@ require('lazy').setup({
       -- Autopairs
       require('mini.pairs').setup()
 
+      -- Completion, and works best with icons and snippets
+      -- require('mini.icons').setup()
+      -- require('mini.snippets').setup()
+      -- require('mini.completion').setup {
+      --   fallback_action = '',
+      -- }
+
       -- Simple and easy statusline.
       --  You could remove this setup call if you don't like it,
       --  and try some other statusline plugin
@@ -956,6 +978,16 @@ require('lazy').setup({
 
       -- ... and there is more!
       --  Check out: https://github.com/echasnovski/mini.nvim
+      -- File navigation, replacement for the defaklt 'netrw' that comes with Neovim
+      -- - j/k navigate up and down
+      -- - l move into directory or open file
+      -- - h move out of directory (H to move and close previous directory)
+      -- - g? to open the help menu
+      -- local files = require('mini.files').setup()
+      -- local minifiles_toggle = function()
+      --   if not MiniFiles.close() then MiniFiles.open() end
+      -- end
+      vim.cmd.colorscheme 'miniwinter'
     end,
   },
   { -- Highlight, edit, and navigate code
@@ -1004,7 +1036,7 @@ require('lazy').setup({
   --    This is the easiest way to modularize your config.
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
   --
   -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
   -- Or use telescope!
@@ -1015,6 +1047,15 @@ require('lazy').setup({
     -- If you are using a Nerd Font: set icons to an empty table which will use the
     -- default lazy.nvim defined Nerd Font icons, otherwise define a unicode icons table
     icons = vim.g.have_nerd_font and {} or {
+      -- File navigation, replacement for the defaklt 'netrw' that comes with Neovim
+      -- - j/k navigate up and down
+      -- - l move into directory or open file
+      -- - h move out of directory (H to move and close previous directory)
+      -- - g? to open the help menu
+      -- local files = require('mini.files').setup()
+      -- local minifiles_toggle = function()
+      --   if not MiniFiles.close() then MiniFiles.open() end
+      -- end
       cmd = '⌘',
       config = '🛠',
       event = '📅',
