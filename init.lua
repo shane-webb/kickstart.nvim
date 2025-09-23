@@ -172,13 +172,51 @@ vim.o.confirm = true
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
+-- Open file explorer (netrw at the moment)
+vim.keymap.set('n', '<leader>e', vim.cmd.Ex, { desc = 'Open File Explorer (netrw)' })
+
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 -- Diagnostic keymaps
-vim.keymap.set('n', '<leader>h', vim.diagnostic.open_float, { desc = 'Open diagnostic error messages' })
+vim.keymap.set('n', '<leader>j', vim.diagnostic.open_float, { desc = 'Open diagnostic error messages' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+-- copy diagnostic on current line to clipboard
+vim.keymap.set('n', '<leader>yd', function()
+  local bufnr = 0
+  local pos = vim.api.nvim_win_get_cursor(0)
+  local lnum, col = pos[1] - 1, pos[2]
+
+  -- all diagnostics on this line
+  local diags = vim.diagnostic.get(bufnr, { lnum = lnum })
+  if #diags == 0 then
+    vim.notify('No diagnostics on this line', vim.log.levels.INFO)
+    return
+  end
+
+  -- pick the one nearest to cursor column
+  table.sort(diags, function(a, b)
+    return math.abs(col - (a.col or 0)) < math.abs(col - (b.col or 0))
+  end)
+  local d = diags[1]
+
+  -- build a nice message (include source/code if present)
+  local msg = d.message
+  if d.source and d.code then
+    msg = string.format('[%s/%s] %s', d.source, d.code, msg)
+  elseif d.source then
+    msg = string.format('[%s] %s', d.source, msg)
+  elseif d.code then
+    msg = string.format('[%s] %s', d.code, msg)
+  end
+
+  -- copy to system clipboard (and unnamed register, optional)
+  vim.fn.setreg('+', msg) -- system clipboard
+  -- vim.fn.setreg('"', msg)   -- (optional) default yank register
+
+  vim.notify('Copied diagnostic to clipboard', vim.log.levels.INFO)
+end, { desc = 'Yank diagnostic under cursor to clipboard' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -581,9 +619,6 @@ require('lazy').setup({
           --  Useful when you're not sure what type a variable is and you want to see
           --  the definition of its *type*, not where it was *defined*.
           map('grt', require('telescope.builtin').lsp_type_definitions, '[G]oto [T]ype Definition')
-
-          -- Open file explorer (netrw at the moment)
-          map('<leader>e', vim.cmd.Ex, 'Open File Explorer (netrw)')
 
           -- This function resolves a difference between neovim nightly (version 0.11) and stable (version 0.10)
           ---@param client vim.lsp.Client
