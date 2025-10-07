@@ -969,6 +969,9 @@ require('lazy').setup({
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
 
+  -- Easily visualize colorschemes
+  { 'rktjmp/lush.nvim' },
+
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
     config = function()
@@ -986,6 +989,22 @@ require('lazy').setup({
       -- - sd'   - [S]urround [D]elete [']quotes
       -- - sr)'  - [S]urround [R]eplace [)] [']
       require('mini.surround').setup()
+
+      -- Notifications
+      require('mini.notify').setup {
+        window = {
+          -- bottom-left of editor
+          config = {
+            relative = 'editor',
+            anchor = 'SW',
+            row = vim.o.lines - vim.o.cmdheight - 1,
+            col = 0,
+            border = 'rounded',
+            style = 'minimal',
+          },
+        },
+        max_width_share = 0.42,
+      }
 
       -- Autopairs
       require('mini.pairs').setup()
