@@ -128,6 +128,9 @@ vim.o.undofile = true
 vim.o.ignorecase = true
 vim.o.smartcase = true
 
+vim.opt.autoindent = true
+vim.opt.smartindent = true
+
 -- Keep signcolumn on by default
 vim.o.signcolumn = 'yes'
 
@@ -169,6 +172,9 @@ vim.o.confirm = true
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
+-- Open file explorer (netrw at the moment)
+vim.keymap.set('n', '<leader>e', vim.cmd.Ex, { desc = 'Open File Explorer (netrw)' })
+
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
@@ -177,7 +183,43 @@ vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 vim.keymap.set('n', '<leader>e', vim.cmd.Ex, { desc = 'Open File Explorer (netrw)' })
 
 -- Diagnostic keymaps
+vim.keymap.set('n', '<leader>j', vim.diagnostic.open_float, { desc = 'Open diagnostic error messages' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+-- copy diagnostic on current line to clipboard
+vim.keymap.set('n', '<leader>yd', function()
+  local bufnr = 0
+  local pos = vim.api.nvim_win_get_cursor(0)
+  local lnum, col = pos[1] - 1, pos[2]
+
+  -- all diagnostics on this line
+  local diags = vim.diagnostic.get(bufnr, { lnum = lnum })
+  if #diags == 0 then
+    vim.notify('No diagnostics on this line', vim.log.levels.INFO)
+    return
+  end
+
+  -- pick the one nearest to cursor column
+  table.sort(diags, function(a, b)
+    return math.abs(col - (a.col or 0)) < math.abs(col - (b.col or 0))
+  end)
+  local d = diags[1]
+
+  -- build a nice message (include source/code if present)
+  local msg = d.message
+  if d.source and d.code then
+    msg = string.format('[%s/%s] %s', d.source, d.code, msg)
+  elseif d.source then
+    msg = string.format('[%s] %s', d.source, msg)
+  elseif d.code then
+    msg = string.format('[%s] %s', d.code, msg)
+  end
+
+  -- copy to system clipboard (and unnamed register, optional)
+  vim.fn.setreg('+', msg) -- system clipboard
+  -- vim.fn.setreg('"', msg)   -- (optional) default yank register
+
+  vim.notify('Copied diagnostic to clipboard', vim.log.levels.INFO)
+end, { desc = 'Yank diagnostic under cursor to clipboard' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -251,15 +293,13 @@ rtp:prepend(lazypath)
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   {
-    'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
-    event = 'BufReadPost', -- or "VeryLazy"
-    config = function()
-      require('guess-indent').setup {
+    -- Detect tabstop and shiftwidth automatically
+    'NMAC427/guess-indent.nvim',
+    event = 'BufReadPost', -- set the loading event to after the file has been read into a buffer
+    opts = {}, -- default config
         -- defaults:
         -- auto_cmd = true,
         -- override_editorconfig = false -- set true if you want this to win over .editorconfig
-      }
-    end,
   },
 
   -- NOTE: Plugins can also be added by using a table,
@@ -800,6 +840,13 @@ require('lazy').setup({
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
+        javascript = { 'prettierd', 'prettier' },
+        javascriptreact = { 'prettierd', 'prettier' },
+        typescript = { 'prettierd', 'prettier' },
+        typescriptreact = { 'prettierd', 'prettier' },
+        json = { 'prettierd', 'prettier' },
+        html = { 'prettierd', 'prettier' },
+        css = { 'prettierd', 'prettier' },
       },
     },
   },
@@ -928,6 +975,9 @@ require('lazy').setup({
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
 
+  -- Easily visualize colorschemes
+  { 'rktjmp/lush.nvim' },
+
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
     config = function()
@@ -949,8 +999,31 @@ require('lazy').setup({
       -- - sr)'  - [S]urround [R]eplace [)] [']
       require('mini.surround').setup()
 
+      -- Notifications
+      require('mini.notify').setup {
+        window = {
+          -- bottom-left of editor
+          config = {
+            relative = 'editor',
+            anchor = 'SW',
+            row = vim.o.lines - vim.o.cmdheight - 1,
+            col = 0,
+            border = 'rounded',
+            style = 'minimal',
+          },
+        },
+        max_width_share = 0.42,
+      }
+
       -- Autopairs
       require('mini.pairs').setup()
+
+      -- Completion, and works best with icons and snippets
+      -- require('mini.icons').setup()
+      -- require('mini.snippets').setup()
+      -- require('mini.completion').setup {
+      --   fallback_action = '',
+      -- }
 
       -- Simple and easy statusline.
       --  You could remove this setup call if you don't like it,
@@ -969,6 +1042,16 @@ require('lazy').setup({
 
       -- ... and there is more!
       --  Check out: https://github.com/echasnovski/mini.nvim
+      -- File navigation, replacement for the defaklt 'netrw' that comes with Neovim
+      -- - j/k navigate up and down
+      -- - l move into directory or open file
+      -- - h move out of directory (H to move and close previous directory)
+      -- - g? to open the help menu
+      -- local files = require('mini.files').setup()
+      -- local minifiles_toggle = function()
+      --   if not MiniFiles.close() then MiniFiles.open() end
+      -- end
+      vim.cmd.colorscheme 'miniwinter'
     end,
   },
   { -- Highlight, edit, and navigate code
@@ -1017,7 +1100,7 @@ require('lazy').setup({
   --    This is the easiest way to modularize your config.
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
   --
   -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
   -- Or use telescope!
@@ -1028,6 +1111,15 @@ require('lazy').setup({
     -- If you are using a Nerd Font: set icons to an empty table which will use the
     -- default lazy.nvim defined Nerd Font icons, otherwise define a unicode icons table
     icons = vim.g.have_nerd_font and {} or {
+      -- File navigation, replacement for the defaklt 'netrw' that comes with Neovim
+      -- - j/k navigate up and down
+      -- - l move into directory or open file
+      -- - h move out of directory (H to move and close previous directory)
+      -- - g? to open the help menu
+      -- local files = require('mini.files').setup()
+      -- local minifiles_toggle = function()
+      --   if not MiniFiles.close() then MiniFiles.open() end
+      -- end
       cmd = '⌘',
       config = '🛠',
       event = '📅',
