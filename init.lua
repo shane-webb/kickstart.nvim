@@ -297,9 +297,9 @@ require('lazy').setup({
     'NMAC427/guess-indent.nvim',
     event = 'BufReadPost', -- set the loading event to after the file has been read into a buffer
     opts = {}, -- default config
-        -- defaults:
-        -- auto_cmd = true,
-        -- override_editorconfig = false -- set true if you want this to win over .editorconfig
+    -- defaults:
+    -- auto_cmd = true,
+    -- override_editorconfig = false -- set true if you want this to win over .editorconfig
   },
 
   -- NOTE: Plugins can also be added by using a table,
@@ -1000,20 +1000,20 @@ require('lazy').setup({
       require('mini.surround').setup()
 
       -- Notifications
-      require('mini.notify').setup {
-        window = {
-          -- bottom-left of editor
-          config = {
-            relative = 'editor',
-            anchor = 'SW',
-            row = vim.o.lines - vim.o.cmdheight - 1,
-            col = 0,
-            border = 'rounded',
-            style = 'minimal',
-          },
-        },
-        max_width_share = 0.42,
-      }
+      -- require('mini.notify').setup {
+      --   window = {
+      --     -- bottom-left of editor
+      --     config = {
+      --       relative = 'editor',
+      --       anchor = 'SW',
+      --       row = vim.o.lines - vim.o.cmdheight - 1,
+      --       col = 0,
+      --       border = 'rounded',
+      --       style = 'minimal',
+      --     },
+      --   },
+      --   max_width_share = 0.42,
+      -- }
 
       -- Autopairs
       require('mini.pairs').setup()
