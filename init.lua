@@ -978,7 +978,6 @@ require('lazy').setup({
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
     config = function()
-      -- vim.cmd.colorscheme 'miniwinter'
       -- Color scheme editing
       require('mini.colors').setup()
       -- Better Around/Inside textobjects
@@ -1098,6 +1097,11 @@ require('lazy').setup({
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   { import = 'custom.plugins' },
+  {
+    vim.schedule(function()
+      pcall(vim.cmd.colorscheme, 'miniwinter_modified')
+    end),
+  },
   --
   -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
   -- Or use telescope!

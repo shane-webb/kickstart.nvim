@@ -1,5 +1,5 @@
-local home = vim.loop.os_homedir()
-local dir = vim.fs.joinpath(home, 'miniwinter_modified')
+local nvim_config = vim.fn.stdpath 'config'
+local dir = vim.fs.joinpath(nvim_config, '/colorschemes/miniwinter_modified')
 return {
   -- Easily visualize colorschemes
   'rktjmp/lush.nvim',
