@@ -33,3 +33,5 @@ vim.api.nvim_create_autocmd('ColorScheme', {
   desc = 'Decouple cursor color from Normal in Neovide',
 })
 set_cursor_colors()
+
+return {}

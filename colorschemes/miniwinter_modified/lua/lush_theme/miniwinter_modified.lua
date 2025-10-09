@@ -48,21 +48,26 @@
 -- then /Normal to find the Normal group and edit your fg & bg colors
 ---@diagnostic disable: undefined-global
 --
+-- NOTE:
+-- The Cursor color is actually controlled by a plugin in lua/custom/plugins
 -- The useful/meaningful groups have been moved to the top
 local lush = require("lush")
 local hsl = lush.hsl
-local hsluv = lush.hsl
+local hsluv = lush.hsluv
 local theme = lush(function(injected_functions)
   local sym = injected_functions.sym
   return {
     Normal                                  { fg=hsl(204, 20, 63), bg=hsl(204, 45, 12), }, -- Normal  original value = #d8d4cd, hsl(38, 12, 83)        xxx guifg= guibg=#11262d
     SpecialKey                              { fg="#485f67", }, -- SpecialKey     xxx guifg=#485f67
     Comment                                 { SpecialKey }, -- Comment        xxx guifg=#98948e
-    Cursor                                  { fg=hsl(51, 100, 50), bg=hsl(200, 50, 50), guifg=hsl(200, 50, 10), guibg='#4093bd'}, -- Cursor         xxx guifg=#11262d guibg=#d8d4cd
+    Cursor                                  { fg=hsl(51, 100, 50), bg=hsl(200, 50, 50) }, -- Cursor         xxx guifg=#11262d guibg=#d8d4cd
     lCursor                                 { Cursor }, -- lCursor        xxx guifg=#11262d guibg=#d8d4cd
     TermCursor                              { Cursor }, -- TermCursor  gui="reverse",    xxx cterm=reverse gui=reverse
     TermCursorNC                            { gui="reverse", }, -- TermCursorNC   xxx cterm=reverse gui=reverse
     CursorIM                                { Cursor }, -- CursorIM       xxx links to Cursor
+    CursorColumn                            { bg="#2c4249", }, -- CursorColumn   xxx guibg=#2c4249
+    CursorLine                              { bg="#2c4249", }, -- CursorLine     xxx guibg=#2c4249
+    CursorLineNr                            { fg="#b3daf9", gui="bold", }, -- CursorLineNr   xxx cterm=bold gui=bold guifg=#b3daf9
 
     EndOfBuffer                             { fg="#485f67", }, -- EndOfBuffer    xxx guifg=#485f67
     NonText                                 { fg="#485f67", }, -- NonText        xxx guifg=#485f67
@@ -100,7 +105,6 @@ local theme = lush(function(injected_functions)
     LineNrAbove                             { LineNr }, -- LineNrAbove    xxx links to LineNr
     LineNrBelow                             { LineNr }, -- LineNrBelow    xxx links to LineNr
     TelescopeResultsLineNr                  { LineNr }, -- TelescopeResultsLineNr xxx links to LineNr
-    CursorLineNr                            { fg="#b3daf9", gui="bold", }, -- CursorLineNr   xxx cterm=bold gui=bold guifg=#b3daf9
     FzfLuaBufFlagCur                        { CursorLineNr }, -- FzfLuaBufFlagCur xxx links to CursorLineNr
     CursorLineSign                          { fg="#485f67", }, -- CursorLineSign xxx guifg=#485f67
     CursorLineFold                          { fg="#485f67", }, -- CursorLineFold xxx guifg=#485f67
@@ -189,8 +193,6 @@ local theme = lush(function(injected_functions)
     TabLineFill                             { TabLine }, -- TabLineFill    xxx links to TabLine
     TabLineSel                              { fg="#b3daf9", bg="#051a20", }, -- TabLineSel     xxx guifg=#b3daf9 guibg=#051a20
     netrwMarkFile                           { TabLineSel }, -- netrwMarkFile  xxx links to TabLineSel
-    CursorColumn                            { bg="#2c4249", }, -- CursorColumn   xxx guibg=#2c4249
-    CursorLine                              { bg="#2c4249", }, -- CursorLine     xxx guibg=#2c4249
     MiniFilesCursorLine                     { CursorLine }, -- MiniFilesCursorLine xxx links to CursorLine
     MiniPickMatchCurrent                    { CursorLine }, -- MiniPickMatchCurrent xxx links to CursorLine
     MiniPickPreviewLine                     { CursorLine }, -- MiniPickPreviewLine xxx links to CursorLine
@@ -261,7 +263,7 @@ local theme = lush(function(injected_functions)
     TelescopePreviewCharDev                 { Constant }, -- TelescopePreviewCharDev xxx links to Constant
     TelescopePreviewPipe                    { Constant }, -- TelescopePreviewPipe xxx links to Constant
 
-    Statement                               { Normal }, -- Statement      xxx cterm=bold gui=bold guifg=#d8d4cd
+    Statement                               { fg=Normal.fg }, -- Statement      xxx cterm=bold gui=bold guifg=#d8d4cd
     Conditional                             { Statement }, -- Conditional    xxx links to Statement
     Repeat                                  { Statement }, -- Repeat         xxx links to Statement
     Label                                   { Statement }, -- Label          xxx links to Statement
@@ -297,7 +299,7 @@ local theme = lush(function(injected_functions)
     CmpItemKindTypeParameter                { Type }, -- CmpItemKindTypeParameter xxx links to Type
     DapUIType                               { Type }, -- DapUIType      xxx links to Type
 
-    Function                                { Normal }, -- Function       xxx guifg=#b3daf9
+    Function                                { fg=Normal.fg }, -- Function       xxx guifg=#b3daf9
     sym"@function"                          { fg=Function.fg.saturate(25) }, -- @function      xxx links to Function
     sym"@function.call"                     { fg=Function.fg.saturate(25) }, -- @function.call xxx links to Function
     sym"@method"                            { Function }, -- @method        xxx links to Function
@@ -318,7 +320,7 @@ local theme = lush(function(injected_functions)
     TelescopePreviewSize                    { String }, -- TelescopePreviewSize xxx links to String
     TelescopePreviewExecute                 { String }, -- TelescopePreviewExecute xxx links to String
 
-    Special                                 { fg=hsl(181, 61, 65), }, -- Special        xxx guifg=#a6e1e2
+    Special                                 { fg=hsl(181, 61, 65) }, -- Special        xxx guifg=#a6e1e2
     Tag                                     { Special }, -- Tag            xxx links to Special
     SpecialChar                             { Special }, -- SpecialChar    xxx links to Special
     SpecialComment                          { Special }, -- SpecialComment xxx links to Special
@@ -343,7 +345,7 @@ local theme = lush(function(injected_functions)
     netrwTreeBar                            { Special }, -- netrwTreeBar   xxx links to Special
     netrwPix                                { Special }, -- netrwPix       xxx links to Special
 
-    Identifier                              { fg=hsl(59, 55, 76), }, -- Identifier     xxx guifg=#d9d8aa
+    Identifier                              { fg=hsl(59, 55, 76), bg='NONE', guibg='NONE' }, -- Identifier     xxx guifg=#d9d8aa
     sym"@property"                          { Identifier }, -- @property      xxx links to Identifier
     NvimIdentifier                          { Identifier }, -- NvimIdentifier xxx links to Identifier
     sym"@text.reference"                    { Identifier }, -- @text.reference xxx links to Identifier
@@ -355,14 +357,14 @@ local theme = lush(function(injected_functions)
     TelescopeMultiIcon                      { Identifier }, -- TelescopeMultiIcon xxx links to Identifier
     netrwVersion                            { Identifier }, -- netrwVersion   xxx links to Identifier
 
-    Operator                                { Normal }, -- Operator       xxx guifg=#d8d4cd
+    Operator                                { fg=Normal.fg }, -- Operator       xxx guifg=#d8d4cd
     sym"@operator"                          { Operator }, -- @operator      xxx links to Operator
     NvimAssignment                          { Operator }, -- NvimAssignment xxx links to Operator
     NvimOperator                            { Operator }, -- NvimOperator   xxx links to Operator
     CmpItemKindOperator                     { Operator }, -- CmpItemKindOperator xxx links to Operator
     TelescopeResultsOperator                { Operator }, -- TelescopeResultsOperator xxx links to Operator
 
-    Delimiter                               { Normal }, -- Delimiter      xxx guifg=#f2ccad
+    Delimiter                               { fg=Normal.fg }, -- Delimiter      xxx guifg=#f2ccad
     sym"@punctuation"                       { Delimiter }, -- @punctuation   xxx links to Delimiter
     NvimParenthesis                         { Delimiter }, -- NvimParenthesis xxx links to Delimiter
     NvimColon                               { Delimiter }, -- NvimColon      xxx links to Delimiter
@@ -372,7 +374,7 @@ local theme = lush(function(injected_functions)
     CmpItemKindVariable                     { Delimiter }, -- CmpItemKindVariable xxx links to Delimiter
     netrwDateSep                            { Delimiter }, -- netrwDateSep   xxx links to Delimiter
     netrwCmdSep                             { Delimiter }, -- netrwCmdSep    xxx links to Delimiter
-    sym"@keyword.return"                    { Normal, gui='italic' }, -- @keyword.return xxx cterm=bold gui=bold guifg=#f2ccad
+    sym"@keyword.return"                    { fg=Normal.fg, gui='italic' }, -- @keyword.return xxx cterm=bold gui=bold guifg=#f2ccad
 
 
     LspReferenceText                        { bg="#485f67", }, -- LspReferenceText xxx guibg=#485f67
@@ -464,7 +466,7 @@ local theme = lush(function(injected_functions)
     MasonMuted                              { Comment }, -- MasonMuted     xxx links to Comment
     TelescopeResultsComment                 { Comment }, -- TelescopeResultsComment xxx links to Comment
     netrwComment                            { Comment }, -- netrwComment   xxx links to Comment
-    sym"@variable"                          { Normal }, -- @variable      xxx guifg=#d8d4cd
+    sym"@variable"                          { fg=Normal.fg }, -- @variable      xxx guifg=#d8d4cd
     sym"@lsp.type.variable"                 { sym"@variable" }, -- @lsp.type.variable xxx links to @variable
 
     Todo                                    { fg="#b3daf9", gui="bold", bg="#00324f", }, -- Todo           xxx cterm=bold gui=bold guifg=#b3daf9 guibg=#00324f
@@ -476,11 +478,11 @@ local theme = lush(function(injected_functions)
     sym"@markup.heading.1"                  { fg="#f2ccad", }, -- @markup.heading.1 xxx guifg=#f2ccad
     markdownH1                              { sym"@markup.heading.1" }, -- markdownH1     xxx links to @markup.heading.1
     HelpviewHeading1                        { sym"@markup.heading.1" }, -- HelpviewHeading1 xxx links to @markup.heading.1
-    sym"@markup.heading.1.delimiter.vimdoc" { fg="bg", gui="underdouble,nocombine", bg="bg", sp="fg", }, -- @markup.heading.1.delimiter.vimdoc xxx cterm=underdouble,nocombine gui=underdouble,nocombine guifg=bg guibg=bg guisp=fg
+    sym"@markup.heading.1.delimiter.vimdoc" { fg=Normal.bg, gui="underdouble,nocombine", bg=Normal.bg, sp=Normal.fg, }, -- @markup.heading.1.delimiter.vimdoc xxx cterm=underdouble,nocombine gui=underdouble,nocombine guifg=bg guibg=bg guisp=fg
     sym"@markup.heading.2"                  { fg="#d9d8aa", }, -- @markup.heading.2 xxx guifg=#d9d8aa
     markdownH2                              { sym"@markup.heading.2" }, -- markdownH2     xxx links to @markup.heading.2
     HelpviewHeading2                        { sym"@markup.heading.2" }, -- HelpviewHeading2 xxx links to @markup.heading.2
-    sym"@markup.heading.2.delimiter.vimdoc" { fg="bg", gui="underline,nocombine", bg="bg", sp="fg", }, -- @markup.heading.2.delimiter.vimdoc xxx cterm=underline,nocombine gui=underline,nocombine guifg=bg guibg=bg guisp=fg
+    sym"@markup.heading.2.delimiter.vimdoc" { fg=Normal.bg, gui="underline,nocombine", bg=Normal.bg, sp=Normal.fg, }, -- @markup.heading.2.delimiter.vimdoc xxx cterm=underline,nocombine gui=underline,nocombine guifg=bg guibg=bg guisp=fg
     sym"@lsp.mod.deprecated"                { fg="#fac5c7", }, -- @lsp.mod.deprecated xxx guifg=#fac5c7
     DiagnosticDeprecated                    { gui="strikethrough", sp="#fac5c7", }, -- DiagnosticDeprecated xxx cterm=strikethrough gui=strikethrough guisp=#fac5c7
     FloatShadow                             { blend=80, bg="nvimdarkgrey4", }, -- FloatShadow    xxx ctermbg=0 guibg=NvimDarkGrey4 blend=80
